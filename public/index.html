@@ -1,29 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arrow Mail</title>
+  <title>Arrow — Prospecting Platform</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="app">
-    <header>
-      <div class="logo">↗ Arrow Mail</div>
-      <nav>
-        <button class="tab-btn active" data-tab="settings">⚙ Settings</button>
-        <button class="tab-btn" data-tab="leads">👥 Contacts</button>
-        <button class="tab-btn" data-tab="compose">✉ Compose</button>
-      </nav>
-      <div class="header-right">
-        <span id="header-status"></span>
+
+    <aside id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-arrow">↗</div>
+        <div>
+          <div class="logo-name">Arrow</div>
+          <div class="logo-sub">Prospecting Platform</div>
+        </div>
       </div>
-    </header>
-    <main>
-      <div id="tab-settings" class="tab-content active"></div>
-      <div id="tab-leads" class="tab-content"></div>
-      <div id="tab-compose" class="tab-content"></div>
-    </main>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item" data-page="dashboard">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+          Dashboard
+        </a>
+
+        <div class="nav-section">Cold Email</div>
+
+        <a class="nav-item" data-page="contacts">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+          Contacts
+        </a>
+
+        <a class="nav-item" data-page="campaigns">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+          Campagnes
+        </a>
+
+        <div class="nav-section">Bientôt</div>
+
+        <a class="nav-item nav-soon">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+          Cold Call
+          <span class="badge-soon">Soon</span>
+        </a>
+
+        <a class="nav-item nav-soon">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clip-rule="evenodd"/></svg>
+          LinkedIn
+          <span class="badge-soon">Soon</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a class="nav-item" data-page="settings">
+          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
+          Paramètres
+        </a>
+        <div class="sidebar-version">Arrow v1.0 · Cold Email</div>
+      </div>
+    </aside>
+
+    <div id="main-content">
+      <div id="page-dashboard"  class="page"></div>
+      <div id="page-contacts"   class="page"></div>
+      <div id="page-campaigns"  class="page"></div>
+      <div id="page-settings"   class="page"></div>
+    </div>
+
+    <!-- Lead profile panel -->
+    <div id="profile-overlay" onclick="closeProfile()"></div>
+    <div id="profile-panel"><div id="profile-inner"></div></div>
+
+    <!-- Preview modal -->
+    <div id="modal-overlay" class="hidden" onclick="closeModal()"></div>
+    <div id="modal" class="hidden"><div id="modal-inner"></div></div>
+
   </div>
   <script src="app.js"></script>
 </body>
