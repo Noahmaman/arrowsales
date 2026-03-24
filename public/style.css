@@ -292,6 +292,44 @@ textarea.form-input { resize: vertical; line-height: 1.6; }
 }
 #toast.toast-error { background: #7f1d1d; }
 
+/* ── Import card (always visible zone) ── */
+.import-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.import-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; gap: 12px; flex-wrap: wrap;
+}
+.import-ta {
+  width: 100%;
+  height: 130px;
+  border: none;
+  border-top: 1px solid var(--border);
+  outline: none;
+  resize: none;
+  font-size: 12px;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  padding: 12px 16px;
+  color: var(--text);
+  background: #fafbfc;
+  display: block;
+  line-height: 1.6;
+}
+.import-ta:focus { background: #fff; }
+.import-preview-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px;
+  background: #f0fdf4;
+  border-top: 1px solid #bbf7d0;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
 /* ── Import banner ── */
 .import-banner {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;

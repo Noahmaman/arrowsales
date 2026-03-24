@@ -222,16 +222,25 @@ function confirmImport(mode) {
 
 // ─── Parse pasted sheet data ──────────────────────────────────────────────────
 function parsePaste(text) {
-  const lines = text.trim().split('\n').filter(l => l.trim());
+  // Fix Windows/Mac line endings FIRST (critical for \r\n from Excel/Sheets export)
+  const normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalized.trim().split('\n').filter(l => l.trim());
   if (lines.length < 1) return null;
-  const delim = lines[0].includes('\t') ? '\t' : ',';
+
+  // Detect delimiter: tab (Google Sheets), semicolon (French Excel), comma (CSV)
+  const firstLine = lines[0];
+  const delim = firstLine.includes('\t') ? '\t'
+    : firstLine.includes(';') ? ';'
+    : ',';
 
   function splitLine(line) {
-    if (delim === '\t') return line.split('\t').map(v => v.trim().replace(/^"|"$/g, ''));
+    // Remove trailing \r just in case
+    const clean = line.replace(/\r$/, '');
+    if (delim === '\t') return clean.split('\t').map(v => v.trim().replace(/^"|"$/g, ''));
     const out = []; let cur = '', inQ = false;
-    for (const ch of line) {
+    for (const ch of clean) {
       if (ch === '"') inQ = !inQ;
-      else if (ch === ',' && !inQ) { out.push(cur.trim()); cur = ''; }
+      else if (ch === delim && !inQ) { out.push(cur.trim()); cur = ''; }
       else cur += ch;
     }
     return [...out, cur.trim()];
@@ -312,6 +321,107 @@ function renderDashboard() {
     </div>`;
 }
 
+// ─── Import zone (always visible) ────────────────────────────────────────────
+function renderImportZone(pending, total, list, columns) {
+  const pendingBanner = pending ? `
+    <div class="import-banner">
+      <span class="import-banner-info">
+        ✅ <strong>${pending.leads.length} contact${pending.leads.length>1?'s':''}</strong> détecté${pending.leads.length>1?'s':''} ·
+        ${pending.columnOrder.map(c=>`<span class="import-col-tag">${esc(colLabel(c))}</span>`).join('')}
+      </span>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" onclick="confirmImport('replace')">Remplacer tout</button>
+        <button class="btn btn-secondary btn-sm" onclick="confirmImport('add')">Ajouter aux ${total} existants</button>
+        <button class="btn btn-ghost btn-sm" onclick="S.pendingImport=null;renderContacts()">✕ Annuler</button>
+      </div>
+    </div>` : '';
+
+  const pasteZone = `
+    <div class="import-card">
+      <div class="import-card-header">
+        <div>
+          <strong>📋 Importer depuis Google Sheets / Excel</strong>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">
+            Dans ton sheet : <kbd>Ctrl+A</kbd> pour tout sélectionner → <kbd>Ctrl+C</kbd> pour copier → colle ici
+          </div>
+        </div>
+        <div class="btn-group">
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer">
+            📂 Fichier CSV/Excel
+            <input type="file" accept=".csv,.tsv,.txt,.xls,.xlsx" style="display:none" onchange="importFile(this)">
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="toggleImportZone()">
+            <span id="import-toggle-label">${total > 0 ? 'Masquer' : 'Ouvrir'}</span>
+          </button>
+        </div>
+      </div>
+      <div id="import-textarea-zone" style="${total > 0 && !pending ? 'display:none' : ''}">
+        <textarea id="import-ta"
+          class="import-ta"
+          placeholder="Colle ici tes données Google Sheets / Excel…&#10;&#10;La 1ère ligne = en-têtes de colonnes.&#10;Exemple :&#10;Prénom&#9;Nom&#9;Email&#9;Entreprise&#10;Alice&#9;Martin&#9;alice@acme.com&#9;Acme Corp"
+          oninput="onImportInput(this.value)"
+          onpaste="onImportPaste(event)"></textarea>
+        <div id="import-ta-preview"></div>
+      </div>
+    </div>`;
+
+  if (total === 0) {
+    return pendingBanner + pasteZone;
+  }
+  return pendingBanner + pasteZone + renderXLGrid(list, columns);
+}
+
+function toggleImportZone() {
+  const zone = document.getElementById('import-textarea-zone');
+  const label = document.getElementById('import-toggle-label');
+  if (!zone) return;
+  const hidden = zone.style.display === 'none';
+  zone.style.display = hidden ? '' : 'none';
+  if (label) label.textContent = hidden ? 'Masquer' : 'Ouvrir';
+}
+
+function onImportPaste(event) {
+  // Get text from clipboard directly for maximum reliability
+  const text = event.clipboardData?.getData('text/plain') || '';
+  if (!text.trim()) return;
+  // Small delay to let the textarea value update first
+  setTimeout(() => onImportInput(text), 10);
+}
+
+function onImportInput(text) {
+  const preview = document.getElementById('import-ta-preview');
+  if (!text.trim()) {
+    if (preview) preview.innerHTML = '';
+    return;
+  }
+  const result = parsePaste(text);
+  if (!result || !result.leads.length) {
+    if (preview) preview.innerHTML = `<div style="color:var(--error);font-size:12px;padding:6px 12px">
+      ⚠ Aucune ligne valide. Vérifie que la 1ère ligne contient les en-têtes de colonnes.
+    </div>`;
+    return;
+  }
+  if (preview) preview.innerHTML = `
+    <div class="import-preview-bar">
+      <span>✅ <strong>${result.leads.length}</strong> contact${result.leads.length>1?'s':''} ·
+        ${result.columnOrder.map(c=>`<span class="import-col-tag">${esc(colLabel(c))}</span>`).join('')}
+      </span>
+      <div class="btn-group">
+        <button class="btn btn-primary btn-sm" onclick="doImportFromTA('replace')">Importer (remplacer)</button>
+        <button class="btn btn-secondary btn-sm" onclick="doImportFromTA('add')">Ajouter aux existants</button>
+      </div>
+    </div>`;
+  // Store parsed result
+  S.pendingImport = result;
+}
+
+function doImportFromTA(mode) {
+  confirmImport(mode);
+  // Clear textarea
+  const ta = document.getElementById('import-ta');
+  if (ta) ta.value = '';
+}
+
 // ─── CONTACTS ─────────────────────────────────────────────────────────────────
 function renderContacts() {
   const el = document.getElementById('page-contacts');
@@ -334,19 +444,6 @@ function renderContacts() {
       </div>
     </div>
 
-    ${pending ? `
-    <div class="import-banner">
-      <span class="import-banner-info">
-        📋 <strong>${pending.leads.length} contacts</strong> prêts à importer ·
-        ${pending.columnOrder.map(c=>`<span class="import-col-tag">${esc(colLabel(c))}</span>`).join('')}
-      </span>
-      <div class="btn-group">
-        <button class="btn btn-primary btn-sm" onclick="confirmImport('replace')">Remplacer tout</button>
-        <button class="btn btn-secondary btn-sm" onclick="confirmImport('add')">Ajouter (${total+pending.leads.length})</button>
-        <button class="btn btn-ghost btn-sm" onclick="S.pendingImport=null;renderContacts()">✕</button>
-      </div>
-    </div>` : ''}
-
     <div class="grid-bar">
       <input class="grid-search" type="text" placeholder="🔍 Rechercher…" value="${esc(S.search)}"
         oninput="S.search=this.value;renderContacts()">
@@ -357,17 +454,7 @@ function renderContacts() {
       <span class="grid-info">${list.length}${list.length!==total?` / ${total}`:''} contact${list.length!==1?'s':''}</span>
     </div>
 
-    ${total === 0 ? `
-      <div class="xl-empty">
-        <div class="xl-empty-icon">📋</div>
-        <div class="xl-empty-title">Colle ton Google Sheet ici</div>
-        <div class="xl-empty-sub">Sélectionne tout dans Google Sheets <kbd>Ctrl+A</kbd> puis copie <kbd>Ctrl+C</kbd><br>et colle directement sur cette page <kbd>Ctrl+V</kbd></div>
-        <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="document.getElementById('file-import').click()">📂 Importer un fichier CSV</button>
-          <button class="btn btn-secondary" onclick="addRow()">+ Ajouter manuellement</button>
-        </div>
-        <input type="file" id="file-import" accept=".csv,.tsv,.txt" style="display:none" onchange="importFile(this)">
-      </div>` : renderXLGrid(list, columns)}`;
+    ${renderImportZone(pending, total, list, columns)}`;
 }
 
 function renderXLGrid(list, columns) {
