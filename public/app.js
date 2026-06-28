@@ -11,7 +11,8 @@ const S = {
   search: '',
   statusFilter: 'all',
   sending: false,
-  pendingImport: null   // data waiting for user confirmation
+  pendingImport: null,   // data waiting for user confirmation
+  attachPdfs: false
 };
 
 // ─── Built-in templates ───────────────────────────────────────────────────────
@@ -84,6 +85,99 @@ En bref : [ce que tu fais en 1 phrase].
 
 {{fromName}}`
   }
+];
+
+// ─── Nutritionist templates (30 FR/EN) ────────────────────────────────────────
+const NUTRI_TEMPLATES = [
+  { id:'nt_01', name:'🥦 FR — IA répond 24/7', subject:`{{firstName}}, vos clientes posent encore des questions à 23h ?`,
+    body:`Bonjour {{firstName}},\n\nVous connaissez ce moment : 23h, une cliente vous envoie "je peux manger quoi ce soir ?" pour la 4ème fois cette semaine.\n\nOn a construit Tina pour Laëtitia Suissa : une assistante IA formée sur son programme, qui répond à ses clientes 24/7, dans son style.\n\nRésultat : 92% d'adhérence programme. -3 kg moyens. Plus de messages à minuit.\n\nJ'ai joint le case study + notre présentation Arrow AI.\n\n15 minutes cette semaine pour vous montrer ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_02', name:'🥦 FR — Questions répétitives', subject:`{{firstName}} — combien de fois vous répondez aux mêmes questions ?`,
+    body:`Bonjour {{firstName}},\n\n"C'est quoi un bon petit-déjeuner ?"\n"Je peux manger au restaurant ce soir ?"\n"J'ai des ballonnements, c'est normal ?"\n\nCes 3 questions — vous les recevez probablement chaque semaine, de chaque cliente.\n\nTina, l'IA qu'on a construite pour Laëtitia Suissa, répond à ces questions à sa place. Formée sur son contenu, dans son style, disponible 24/7.\n\nSes clientes obtiennent une réponse en 10 secondes. Elle récupère son temps.\n\nCase study en pièce jointe.\n\n15 min cette semaine ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_03', name:'🥦 FR — Clientes qui décrochent', subject:`{{firstName}}, vos clientes arrêtent au bout de 3 semaines ?`,
+    body:`Bonjour {{firstName}},\n\nSemaine 1 : motivée à fond.\nSemaine 3 : elle répond de moins en moins.\nSemaine 6 : silence total.\n\nC'est le cycle que toutes les nutritionnistes connaissent.\n\nArrow AI casse ce cycle : espace client dédié, IA de soutien motivationnel 24/7, emails de suivi automatiques — tout sous votre nom.\n\nLaëtitia Suissa l'a mis en place. 92% d'adhérence. -3 kg moyens.\n\nJ'ai tout mis en pièce jointe.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_04', name:'🥦 FR — Espace client dédié', subject:`{{firstName}}, vos clientes ont un espace dédié ?`,
+    body:`Bonjour {{firstName}},\n\nImaginez que chaque cliente arrive sur son espace personnel :\n→ Son programme personnalisé\n→ Ses 45 documents et recettes\n→ Ses vidéos de la semaine\n→ Son suivi de poids\n→ Une IA disponible 24/7\n\nSous votre nom. À votre image.\n\nC'est ce qu'Arrow AI a construit pour Laëtitia Suissa — diét-nutritionniste.\n\nCase study + présentation en pièces jointes.\n\nUn appel de 15 min ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_05', name:'🥦 FR — Scale sans embaucher', subject:`{{firstName}} — servir 2x plus de clientes, même temps`,
+    body:`Bonjour {{firstName}},\n\nLimiter votre patientèle à cause du temps — c'est une contrainte qu'on peut lever.\n\nArrow AI automatise les parties répétitives de votre activité : réponses aux questions, emails de suivi, gestion des documents, soutien motivationnel.\n\nVous gardez la stratégie et la revue humaine. L'IA fait le reste.\n\nLaëtitia Suissa l'a fait. Le case study est en pièce jointe.\n\n15 min pour vous montrer ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_06', name:'🥦 FR — Tina case study direct', subject:`Ce qu'Arrow AI a construit pour Laëtitia Suissa`,
+    body:`Bonjour {{firstName}},\n\nLaëtitia Suissa, diét-nutritionniste, avait un problème : trop de questions de clientes, trop peu de temps.\n\nOn lui a construit Tina — une IA formée sur son programme, ses recettes, sa méthode.\n\nAujourd'hui : 92% d'adhérence programme, -3 kg moyens, zéro message à minuit.\n\nJ'ai mis le case study complet + notre présentation en pièces jointes.\n\nUn appel de 15 min cette semaine ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_07', name:'🥦 FR — Emails automatiques', subject:`{{firstName}}, vos clientes reçoivent un suivi automatique ?`,
+    body:`Bonjour {{firstName}},\n\nEnvoyer un email de suivi personnalisé à chaque cliente chaque semaine — c'est du temps.\n\nArrow AI l'automatise : emails motivationnels, rappels de programme, messages de soutien — tout envoyé automatiquement, sous votre nom, dans votre style.\n\nVous vous concentrez sur les consultations. L'IA gère le reste.\n\nCase study de Laëtitia Suissa en pièce jointe.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_08', name:'🥦 FR — Se démarquer', subject:`{{firstName}} — combien de nutris proposent une IA à leurs clientes ?`,
+    body:`Bonjour {{firstName}},\n\nEn 2026, la majorité des nutritionnistes envoient encore des PDF par email.\n\nUn petit nombre propose une expérience différente : espace client dédié, IA de suivi 24/7, soutien motivationnel automatique.\n\nC'est maintenant qu'il y a un avantage à être en avance.\n\nPrésentation + case study en pièces jointes.\n\n15 min pour en parler ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_09', name:'🥦 FR — GEO / ChatGPT', subject:`{{firstName}}, vous apparaissez dans ChatGPT quand on cherche un nutri ?`,
+    body:`Bonjour {{firstName}},\n\nQuand une future cliente demande "meilleure nutritionniste à Paris" à ChatGPT ou Perplexity — votre nom apparaît ?\n\nEn 2026, une part croissante de prospects cherche sur ces moteurs IA. Pas sur Google.\n\nArrow AI travaille votre visibilité dans ces nouveaux moteurs : c'est ce qu'on appelle le GEO.\n\nPrésentation complète en pièce jointe.\n\nVous voulez voir comment ça marche ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_10', name:'🥦 FR — Soft intro', subject:`{{firstName}}, question rapide`,
+    body:`Bonjour {{firstName}},\n\nQuestion directe : est-ce que vos clientes ont un moyen de poser leurs questions nutrition en dehors de vos consultations ?\n\nSi la réponse est WhatsApp ou email — on peut proposer mieux.\n\nArrow AI construit des assistantes IA pour les nutritionnistes. Tina, l'assistante de Laëtitia Suissa, en est l'exemple.\n\nCase study en pièce jointe.\n\nUn appel rapide ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_11', name:'🥦 FR — Témoignage direct', subject:`"Je ne réponds plus à minuit" — Laëtitia Suissa`,
+    body:`Bonjour {{firstName}},\n\n"Je ne réponds plus aux messages à minuit."\n\nC'est ce que nous a dit Laëtitia Suissa après avoir lancé Tina — l'assistante IA qu'Arrow AI a construite pour son programme nutrition.\n\n92% d'adhérence. -3 kg moyens. Et une nutritionniste qui a récupéré ses soirées.\n\nJ'ai tout mis en pièce jointe.\n\n15 min cette semaine ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_12', name:'🥦 FR — ROI temps', subject:`{{firstName}} — récupérez 5h par semaine`,
+    body:`Bonjour {{firstName}},\n\nRépondre aux questions clientes → ~3h/semaine\nEnvoyer les documents → ~1h\nEmails de suivi → ~2h\nTotal : 6h d'admin pour 20 clientes.\n\nArrow AI automatise ça. Vous gardez la revue humaine — tout le reste tourne seul.\n\nLe cas concret de Laëtitia Suissa est en pièce jointe.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_13', name:'🥦 FR — Expérience premium', subject:`{{firstName}}, vos clientes paient pour une expérience premium ?`,
+    body:`Bonjour {{firstName}},\n\nSi vos clientes paient entre 300€ et 1 500€ pour un programme, elles s'attendent à une expérience à la hauteur.\n\nEspace client dédié, IA disponible 24/7, documents centralisés, emails personnalisés automatiques — c'est ce qui différencie un programme premium d'un PDF envoyé par email.\n\nArrow AI construit cette infrastructure. Case study en pièce jointe.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_14', name:'🥦 FR — Documents éparpillés', subject:`{{firstName}} — Google Drive ou espace client dédié ?`,
+    body:`Bonjour {{firstName}},\n\nProgramme semaine 3 → Google Drive.\nRecettes → PDF par WhatsApp.\nQuestions → email.\nVidéos → lien YouTube.\n\nVos clientes jonglent entre 4 endroits pour suivre leur programme.\n\nArrow AI centralise tout dans un espace client : programme, 45 docs, vidéos, suivi — sous votre identité.\n\nCase study + présentation joints.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_15', name:'🥦 FR — Motivation clientes', subject:`{{firstName}}, vos clientes restent motivées jusqu'à la fin ?`,
+    body:`Bonjour {{firstName}},\n\nLa motivation, c'est la variable qui fait tout échouer — ou tout réussir.\n\nUne cliente qui reçoit un message de soutien au bon moment s'accroche plus longtemps.\n\nArrow AI automatise ces messages : personnalisés, dans votre style, envoyés au bon moment. Pas du spam — du soutien.\n\nLaëtitia Suissa l'a mis en place. 92% d'adhérence. Le case study est joint.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_16', name:'🥦 FR — Adherence 92%', subject:`{{firstName}}, 92% d'adhérence programme — voici comment`,
+    body:`Bonjour {{firstName}},\n\n92% d'adhérence programme — c'est le résultat de Laëtitia Suissa depuis qu'elle a lancé son assistante IA.\n\nLa différence ? Ses clientes ont un soutien disponible 24/7 : réponses aux questions, messages motivationnels, rappels de programme.\n\nArrow AI a construit ce système pour elle. On peut faire la même chose pour votre programme.\n\nCase study en pièce jointe.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_17', name:'🥦 FR — Pas besoin d\'être tech', subject:`{{firstName}} — pas besoin d'être tech pour ça`,
+    body:`Bonjour {{firstName}},\n\nLa plupart des nutritionnistes pensent que l'IA, ça demande des compétences techniques.\n\nAvec Arrow AI : on construit le système, on le forme sur votre contenu, on le déploie. Vous utilisez un tableau de bord simple.\n\nLaëtitia Suissa a lancé Tina sans toucher une ligne de code.\n\nCase study + présentation en pièces jointes.\n\n15 min pour une démo ?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_18', name:'🥦 FR — Relance J+5', subject:`Re: {{firstName}}, j'avais envoyé ça`,
+    body:`Bonjour {{firstName}},\n\nJe reviens vers vous suite à mon dernier message — je sais que la boîte mail déborde.\n\nJe voulais juste m'assurer que vous aviez bien vu le case study Tina en pièce jointe.\n\nC'est l'exemple concret de ce qu'Arrow AI a construit pour une nutritionniste. Résultats réels, système opérationnel.\n\nSi le timing n'est pas bon, pas de problème. Si vous voulez 15 min, je suis disponible.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_19', name:'🥦 FR — Marché qui bouge', subject:`{{firstName}}, votre marché change en ce moment`,
+    body:`Bonjour {{firstName}},\n\nLes nutritionnistes qui adoptent l'IA maintenant vont servir 2x plus de clientes avec le même temps d'ici 18 mois.\n\nCelles qui attendent vont se retrouver en concurrence avec des programmes plus réactifs, mieux suivis, à meilleur prix.\n\nArrow AI aide les nutritionnistes à bâtir leur infrastructure IA maintenant — avant que ça devienne obligatoire.\n\nPrésentation et case study en pièces jointes.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_20', name:'🥦 FR — Dernier message', subject:`{{firstName}}, dernier message de ma part`,
+    body:`Bonjour {{firstName}},\n\nC'est mon dernier message — je ne veux pas saturer votre boîte.\n\nSi l'idée d'une IA formée sur votre programme, disponible pour vos clientes 24/7, vous intéresse un jour — je suis là.\n\nLe case study Tina reste en pièce jointe si vous souhaitez y revenir.\n\nBonne continuation,\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_21', name:'🇺🇸 EN — AI for your clients', subject:`{{firstName}} — AI assistant for your nutrition clients`,
+    body:`Hi {{firstName}},\n\nArrow AI built Tina for Laëtitia Suissa, a French nutritionist — an AI trained on her program, available 24/7 for her clients.\n\nResult: 92% program adherence. -3kg average. No more midnight messages.\n\nWe're building the same for other nutrition professionals.\n\nFull case study + presentation attached.\n\n15 minutes this week?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_22', name:'🇺🇸 EN — Client dropout', subject:`{{firstName}}, clients dropping off at week 3?`,
+    body:`Hi {{firstName}},\n\nWeek 1: motivated and engaged.\nWeek 3: responses slow down.\nWeek 6: silence.\n\nIt's the dropout pattern every nutrition professional knows.\n\nArrow AI breaks it: dedicated client space, 24/7 AI support, automated follow-up emails — all under your brand.\n\nCase study attached. Real results.\n\nQuick call this week?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_23', name:'🇺🇸 EN — Scale your practice', subject:`{{firstName}} — 2x more clients, same hours`,
+    body:`Hi {{firstName}},\n\nLimited by time? That's the constraint Arrow AI removes.\n\nWe automate the repetitive parts of your practice: answering client questions, sending follow-ups, managing documents.\n\nYou keep strategy and human review. The AI handles the rest.\n\nWe've built it for a French nutritionist. Case study attached.\n\n15 minutes to see the demo?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_24', name:'🇺🇸 EN — 24/7 AI assistant', subject:`{{firstName}}, what if your program had a 24/7 AI assistant?`,
+    body:`Hi {{firstName}},\n\nWhat if your clients could ask questions about their program at 10pm — and get an accurate, personalized answer?\n\nNot a generic chatbot. An AI trained on your content, in your voice.\n\nThat's what Arrow AI built for Laëtitia Suissa. She called it Tina.\n\nCase study + presentation attached.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_25', name:'🇺🇸 EN — GEO visibility', subject:`{{firstName}} — do you show up when clients search on ChatGPT?`,
+    body:`Hi {{firstName}},\n\nWhen someone searches for a nutritionist on ChatGPT or Perplexity, does your name come up?\n\nIn 2026, a growing share of potential clients search on AI engines — not just Google.\n\nArrow AI builds your visibility in these new search systems through GEO (Generative Engine Optimization).\n\nPresentation attached.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_26', name:'🇺🇸 EN — Repetitive questions', subject:`{{firstName}}, how many times a week do you answer the same questions?`,
+    body:`Hi {{firstName}},\n\n"What's a good breakfast?"\n"Can I eat out this weekend?"\n"I'm bloated, is that normal?"\n\nYou probably get these from every client, every week.\n\nTina (the AI we built for a French nutritionist) answers them in 10 seconds, trained on the practitioner's own content.\n\nYour clients get instant answers. You get your time back.\n\nCase study attached.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_27', name:'🇺🇸 EN — Premium experience', subject:`{{firstName}}, what do your clients get after they pay?`,
+    body:`Hi {{firstName}},\n\nA client pays $500 for your program. What do they get after signing up?\n\nA PDF? A WhatsApp thread?\n\nArrow AI builds a full client experience: program portal, 45+ documents, video library, progress tracking, 24/7 AI assistant — all under your brand.\n\nSee what we built for Laëtitia Suissa. Case study attached.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_28', name:'🇺🇸 EN — Soft intro', subject:`{{firstName}} — quick question`,
+    body:`Hi {{firstName}},\n\nOne direct question: do your clients have a way to ask nutrition questions between sessions?\n\nIf the answer is WhatsApp or email — we can do better.\n\nArrow AI builds AI assistants for nutrition professionals. Tina, built for a French dietitian, is the proof.\n\nCase study attached. Worth a 15-minute call?\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_29', name:'🇺🇸 EN — Follow-up', subject:`Re: {{firstName}}, circling back`,
+    body:`Hi {{firstName}},\n\nJust following up on my last note — didn't want it to get lost.\n\nThe Tina case study is attached. It's the real-world example of what we built for a nutritionist: 92% adherence, -3kg average, zero midnight messages.\n\nHappy to jump on a quick call whenever works for you.\n\n{{fromName}}\nArrow AI — arrow-ai.us` },
+
+  { id:'nt_30', name:'🇺🇸 EN — Last touch', subject:`{{firstName}} — last note from me`,
+    body:`Hi {{firstName}},\n\nLast email — I don't want to clutter your inbox.\n\nIf an AI assistant trained on your program ever makes sense for your practice, I'm here.\n\nThe Tina case study stays attached if you ever want to revisit.\n\nWishing you a great practice,\n\n{{fromName}}\nArrow AI — arrow-ai.us` }
 ];
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -478,6 +572,7 @@ function renderXLGrid(list, columns) {
             ${columns.map(c=>`<th class="xl-th" title="${esc(c)}">${esc(colLabel(c))}</th>`).join('')}
             <th class="xl-th">Statut</th>
             <th class="xl-th">Contacté</th>
+            <th class="xl-th" style="text-align:center">Ouvertures</th>
             <th class="xl-th"></th>
           </tr>
         </thead>
@@ -510,6 +605,9 @@ function xlRow(l, ri, columns, nCols) {
         </select>
       </td>
       <td class="xl-td xl-td-date">${fmt(l.lastSentAt)}</td>
+      <td class="xl-td" style="text-align:center;min-width:70px">
+        ${l.opens ? `<span style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600">👁 ${l.opens}</span>` : '<span style="color:var(--muted);font-size:12px">—</span>'}
+      </td>
       <td class="xl-td xl-td-act">
         <button class="xl-btn-prof" onclick="openProfile('${l.id}')" title="Voir le profil">↗</button>
         <button class="xl-btn-del" onclick="deleteRow('${l.id}')" title="Supprimer">✕</button>
@@ -668,14 +766,22 @@ function renderCampaigns() {
       <div><div class="page-title">Campagnes</div><div class="page-subtitle">Rédige et envoie tes cold emails</div></div>
     </div>
 
-    <!-- Built-in templates gallery -->
+    <!-- Templates gallery -->
     <div class="card" style="margin-bottom:14px">
-      <div class="card-title">Templates prêts à l'emploi — clique pour charger</div>
+      <div class="card-title">Templates génériques</div>
       <div class="tpl-gallery">
         ${BUILTIN.map(t=>`
           <button class="tpl-card" onclick="loadBuiltin('${t.id}')">
             <div class="tpl-card-name">${t.name}</div>
-            <div class="tpl-card-sub">${esc(t.subject.substring(0,42))}…</div>
+            <div class="tpl-card-sub">${esc(t.subject.substring(0,40))}…</div>
+          </button>`).join('')}
+      </div>
+      <div class="card-title" style="margin-top:16px;color:#16a34a">🥦 Nutritionnistes — 30 emails FR/EN · Case Study Tina + Présentation Arrow AI joints auto</div>
+      <div class="tpl-gallery" style="margin-top:8px">
+        ${NUTRI_TEMPLATES.map(t=>`
+          <button class="tpl-card" style="border-color:#bbf7d0;background:#f0fdf4" onclick="loadNutri('${t.id}')">
+            <div class="tpl-card-name" style="color:#15803d">${t.name}</div>
+            <div class="tpl-card-sub">${esc(t.subject.substring(0,40))}…</div>
           </button>`).join('')}
       </div>
     </div>
@@ -731,6 +837,12 @@ function renderCampaigns() {
               ${allVars.map(v=>`<span class="var-chip" onclick="insertVar('${v}')">{{${v}}}</span>`).join('')}
             </div>
           </div>
+          <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;cursor:pointer">
+            <input type="checkbox" id="attach-pdfs" ${S.attachPdfs?'checked':''} onchange="S.attachPdfs=this.checked" style="width:15px;height:15px;flex-shrink:0">
+            <span style="font-size:13px;font-weight:500;color:#15803d">📎 Joindre les PDFs Arrow AI
+              <span style="font-weight:400;color:var(--muted)"> — Case Study Tina + Présentation Arrow AI</span>
+            </span>
+          </label>
           <div class="btn-group">
             <button class="btn btn-secondary" onclick="saveCmp()">💾 Sauvegarder</button>
             <button class="btn btn-secondary" onclick="previewCmp()">👁 Aperçu</button>
@@ -752,13 +864,23 @@ function renderCampaigns() {
 function loadBuiltin(id) {
   const t = BUILTIN.find(x=>x.id===id);
   if (!t) return;
-  // Create a new user campaign from this template
   const cmp = { id:'cmp_'+Date.now(), name:t.name.replace(/^[^\w]+/,'').trim(), subject:t.subject, body:t.body, createdAt:new Date().toISOString(), sends:[] };
   S.campaigns.push(cmp);
   S.activeCampaign = cmp;
   api('POST', '/api/campaigns', S.campaigns);
   renderCampaigns();
   toast(`Template "${cmp.name}" chargé — personnalise et envoie !`);
+}
+function loadNutri(id) {
+  const t = NUTRI_TEMPLATES.find(x=>x.id===id);
+  if (!t) return;
+  const cmp = { id:'cmp_'+Date.now(), name:t.name.replace(/^[^\wÀ-ž🥦🇺🇸]+/,'').trim()||t.name, subject:t.subject, body:t.body, createdAt:new Date().toISOString(), sends:[] };
+  S.campaigns.push(cmp);
+  S.activeCampaign = cmp;
+  S.attachPdfs = true;
+  api('POST', '/api/campaigns', S.campaigns);
+  renderCampaigns();
+  toast(`✅ "${t.name}" chargé — PDFs Arrow AI activés automatiquement`);
 }
 function insertVar(v) {
   const el = window._compFocus || document.getElementById('cmp-body');
@@ -830,7 +952,7 @@ async function sendTest() {
   area.innerHTML = '<div class="alert alert-info"><span class="spinner spinner-dark"></span> Envoi test…</div>';
   const testLead = {id:'test',firstName:'Test',lastName:'',company:'Test',email:S.settings.email,website:'',notes:'',customFields:{}};
   try {
-    const resp = await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject,body,delay:0,testLead})});
+    const resp = await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({subject,body,delay:0,testLead,attachPdfs:S.attachPdfs})});
     const r = await readStream(resp, null, 1);
     area.innerHTML = r.sent>0 ? `<div class="alert alert-success">✓ Email test envoyé à ${esc(S.settings.email)}</div>`
       : `<div class="alert alert-error">✗ ${esc(r.lastError||'Erreur inconnue')}</div>`;
@@ -856,7 +978,7 @@ async function sendCampaign() {
 
   try {
     const resp = await fetch('/api/send',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({leadIds,subject,body,delay,campaignId:S.activeCampaign?.id,campaignName:S.activeCampaign?.name})});
+      body:JSON.stringify({leadIds,subject,body,delay,campaignId:S.activeCampaign?.id,campaignName:S.activeCampaign?.name,attachPdfs:S.attachPdfs})});
     await readStream(resp, (d)=>onSendEvt(d,total), total);
   } catch(e) { area.innerHTML=`<div class="alert alert-error">${esc(e.message)}</div>`; }
   finally {
@@ -894,7 +1016,16 @@ function renderSettings() {
           <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--primary);font-weight:400;margin-left:6px;font-size:11px">Obtenir ↗</a></div>
           <input type="password" class="form-input" id="s-pass" placeholder="${S.settings.hasPassword?'••••••••••••••••  (enregistré)':'Mot de passe 16 caractères'}"></div>
         <div class="form-group"><div class="form-label">Nom affiché dans les emails</div>
-          <input type="text" class="form-input" id="s-name" value="${esc(S.settings.fromName)}" placeholder="Ton nom"></div>
+          <input type="text" class="form-input" id="s-name" value="${esc(S.settings.fromName)}" placeholder="Ton Nom — Arrow AI"></div>
+        <div class="form-group"><div class="form-label">Signature (ajoutée à chaque email)</div>
+          <textarea class="form-input" id="s-sig" rows="3" placeholder="—&#10;{{fromName}}&#10;Arrow AI · arrow-ai.us">${esc(S.settings.signature||'')}</textarea></div>
+        <div class="form-group"><div class="form-label">URL publique de l'app <span style="font-size:11px;color:var(--muted);font-weight:400">(pour tracking d'ouverture — optionnel)</span></div>
+          <input type="text" class="form-input" id="s-url" value="${esc(S.settings.appUrl||'')}" placeholder="https://ton-domaine.com"></div>
+        <div class="form-group" style="border-top:1px solid var(--border);padding-top:16px;margin-top:4px">
+          <div class="form-label">🟠 HubSpot Private App Token <span style="font-size:11px;color:var(--muted);font-weight:400">(optionnel — log automatique dans CRM)</span></div>
+          <input type="password" class="form-input" id="s-hs" value="${esc(S.settings.hubspotApiKey||'')}" placeholder="${S.settings.hubspotApiKey?'••••  (enregistré)':'pat-na1-...'}">
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">Chaque email envoyé + chaque ouverture détectée → loggé dans HubSpot CRM sous le contact.</div>
+        </div>
         <div class="btn-group">
           <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder</button>
           <button class="btn btn-secondary" onclick="testConn()"><span id="ts"></span> Tester la connexion</button>
@@ -919,7 +1050,10 @@ async function saveSettings() {
   const email=document.getElementById('s-email').value.trim();
   const password=document.getElementById('s-pass').value.trim();
   const fromName=document.getElementById('s-name').value.trim();
-  const body={email,fromName}; if(password) body.password=password;
+  const signature=document.getElementById('s-sig')?.value||'';
+  const appUrl=document.getElementById('s-url')?.value.trim()||'';
+  const hubspotApiKey=document.getElementById('s-hs')?.value.trim()||'';
+  const body={email,fromName,signature,appUrl,hubspotApiKey}; if(password) body.password=password;
   await api('POST','/api/settings',body);
   S.settings = await api('GET','/api/settings');
   document.getElementById('s-pass').value='';
