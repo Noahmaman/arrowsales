@@ -76,7 +76,11 @@ const PORT = process.env.PORT || 3000;
 
 // ── Encrypted storage (file local / Vercel KV en prod) ─────────────────────────
 
-const DATA_FILE = path.join(__dirname, 'data', 'store.enc');
+// Use /tmp on read-only filesystems (Vercel), local data/ otherwise
+const DATA_FILE = (() => {
+  const local = path.join(__dirname, 'data', 'store.enc');
+  try { fs.mkdirSync(path.dirname(local), { recursive: true }); return local; } catch { return '/tmp/arrow-store.enc'; }
+})();
 
 function getKey() {
   const secret = process.env.DATA_KEY || 'arrow-mail-default-insecure-key';
